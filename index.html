@@ -70,7 +70,9 @@ Ankunft: ${ankunft}
 
 Viele Grüße`;
 
-      const mailtoLink = `mailto:?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
+const empfaenger = "anwar.abosaad@diebel-spedition.de";
+const betreff = "Flugdaten";
+const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
       window.location.href = mailtoLink;
     }
   </script>
