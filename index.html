@@ -20,12 +20,56 @@
 <body>
   <h2>Flugdaten eingeben</h2>
   <form id="flugForm">
-    <label>Name: <input type="text" id="name" required /></label>
-    <label>Nachname: <input type="text" id="nachname" required /></label>
+    <label>Vorname:
+      <input type="text" id="name" required />
+    </label>
+    <label>Nachname:
+      <input type="text" id="nachname" required />
+    </label>
     <label>Flugtyp:
       <select id="flugtyp">
         <option value="Flug nach Hause">Flug nach Hause</option>
         <option value="Flug nach Arbeit">Flug nach Arbeit</option>
       </select>
     </label>
-    <label>Datum: <input
+    <label>Datum:
+      <input type="date" id="datum" required />
+    </label>
+    <label>Abflug (z. B. 08:00):
+      <input type="time" id="abflug" required />
+    </label>
+    <label>Ankunft (z. B. 12:00):
+      <input type="time" id="ankunft" required />
+    </label>
+    <button type="button" onclick="sendeMail()">📧 E-Mail erzeugen</button>
+  </form>
+
+  <script>
+    function sendeMail() {
+      const name = document.getElementById("name").value;
+      const nachname = document.getElementById("nachname").value;
+      const flugtyp = document.getElementById("flugtyp").value;
+      const datum = document.getElementById("datum").value;
+      const abflug = document.getElementById("abflug").value;
+      const ankunft = document.getElementById("ankunft").value;
+
+      const betreff = "Flug";
+      const text = `Hallo,
+
+anbei ist mein Flug:
+
+Name: ${name}
+Nachname: ${nachname}
+Flugtyp: ${flugtyp}
+Datum: ${datum}
+Abflug: ${abflug}
+Ankunft: ${ankunft}
+
+Viele Grüße`;
+
+      const mailtoLink = `mailto:?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
+      window.location.href = mailtoLink;
+    }
+  </script>
+</body>
+</html>
