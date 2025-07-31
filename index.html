@@ -19,29 +19,29 @@
 </head>
 <body>
   <div style="display: flex; justify-content: space-between; align-items: center;">
-  <h2>Flugdaten eingeben</h2>
+  <h2>Flug Daten / Flight Details</h2>
   <img src="Diebel Flug1.png" alt="Logo" style="height: 50px;" />
 </div>
   <form id="flugForm">
-    <label>Vorname:
+    <label>Vorname/Firstname:
       <input type="text" id="name" required />
     </label>
-    <label>Nachname:
+    <label>Nachname/Lastname:
       <input type="text" id="nachname" required />
     </label>
-    <label>Flugtyp:
+    <label>Flugtyp/Flight type:
       <select id="flugtyp">
         <option value="Flug nach Hause">Flug nach Hause</option>
         <option value="Flug nach Arbeit">Flug nach Arbeit</option>
       </select>
     </label>
-    <label>Datum:
+    <label>Datum/Date:
       <input type="date" id="datum" required />
     </label>
-    <label>Abflug (z. B. 08:00):
+    <label>Abflug/Departure (z. B. 08:00):
       <input type="time" id="abflug" required />
     </label>
-    <label>Ankunft (z. B. 12:00):
+    <label>Ankunft/Arrival (z. B. 12:00):
       <input type="time" id="ankunft" required />
     </label>
     <button type="button" onclick="sendeMail()">📧 E-Mail erzeugen</button>
