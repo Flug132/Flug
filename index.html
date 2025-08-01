@@ -104,8 +104,10 @@
       }
 
       // Von/Nach
-      const from = text.match(/From\s+([A-Za-zÄÖÜäöü \-]+)/i)?.[1]?.trim() || "";
-      const to = text.match(/To\s+([A-Za-zÄÖÜäöü \-]+)/i)?.[1]?.trim() || "";
+      const fromMatch = text.match(/From\s+([A-Za-zÄÖÜäöü \-]+)/i);
+      const toMatch = text.match(/To\s+([A-Za-zÄÖÜäöü \-]+)/i);
+      const from = fromMatch ? fromMatch[1].trim() : "";
+      const to = toMatch ? toMatch[1].trim() : "";
       document.getElementById("von").value = from;
       document.getElementById("nach").value = to;
 
