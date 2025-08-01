@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Flugdaten Formular</title>
+  <title>Flugdaten Formular mit KI</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; }
@@ -22,11 +22,7 @@
 <body>
   <h2>Flugdaten / Flight Details</h2>
 
-  <label>📷 Flugticket Bild hochladen / Upload ticket image:
-    <input type="file" accept="image/*" onchange="verarbeiteBild(event)">
-  </label>
-  <img id="preview" style="display:none" />
-
+  <!-- Vorname & Nachname ganz oben -->
   <form id="flugForm">
     <label>Vorname / First Name:
       <input type="text" id="vorname" required />
@@ -34,21 +30,29 @@
     <label>Nachname / Last Name:
       <input type="text" id="nachname" required />
     </label>
+
+    <label>📷 Flugticket Bild hochladen / Upload ticket image:
+      <input type="file" accept="image/*" onchange="verarbeiteBild(event)">
+    </label>
+    <img id="preview" style="display:none" />
+
+    <!-- Automatisch befüllte, nicht bearbeitbare Felder -->
     <label>Flugtyp / Flight type:
-      <select id="flugtyp">
+      <select id="flugtyp" disabled>
         <option value="Flug nach Hause">Flug nach Hause</option>
         <option value="Flug nach Arbeit">Flug nach Arbeit</option>
       </select>
     </label>
     <label>Datum / Date:
-      <input type="date" id="datum" required />
+      <input type="date" id="datum" readonly />
     </label>
     <label>Abflug / Departure:
-      <input type="time" id="abflug" required />
+      <input type="time" id="abflug" readonly />
     </label>
     <label>Ankunft / Arrival:
-      <input type="time" id="ankunft" required />
+      <input type="time" id="ankunft" readonly />
     </label>
+
     <button type="button" onclick="sendeMail()">📧 E-Mail senden</button>
   </form>
 
@@ -86,9 +90,10 @@
 
           // Flugtyp ermitteln
           const allCodes = [...text.matchAll(/\b[A-Z]{3}\b/g)].map(m => m[0]);
-          const ziel = allCodes[1] || ""; // 2. Code = Ziel
+          const ziel = allCodes[1] || "";
           const isArbeit = deutscheStadtCodes.includes(ziel);
-          document.getElementById('flugtyp').value = isArbeit ? "Flug nach Arbeit" : "Flug nach Hause";
+          const flugtypElem = document.getElementById('flugtyp');
+          flugtypElem.value = isArbeit ? "Flug nach Arbeit" : "Flug nach Hause";
         });
     }
 
@@ -105,8 +110,4 @@
       const text = `Hallo,\n\nanbei ist mein Flug:\n\nVorname / First Name: ${vorname}\nNachname / Last Name: ${nachname}\nFlugtyp / Flight type: ${flugtyp}\nDatum / Date: ${datum}\nAbflug / Departure: ${abflug}\nAnkunft / Arrival: ${ankunft}\n\nViele Grüße`;
 
       const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
-      window.location.href = mailtoLink;
-    }
-  </script>
-</body>
-</html>
+      window.lo
