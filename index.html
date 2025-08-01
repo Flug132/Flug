@@ -5,27 +5,29 @@
   <title>Flugdaten OCR</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <style>
-    body { font-family: Arial; margin: 20px; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
     input, select, button { width: 100%; margin-top: 5px; padding: 8px; }
     img { max-width: 100%; margin-top: 20px; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h2>Flugticket hochladen</h2>
+  <h2>Flugticket hochladen / Upload Flight Ticket</h2>
   <input type="file" accept="image/*" onchange="handleImageUpload(event)" />
   <img id="preview" />
 
   <form id="flugForm">
-    <label>Vorname:<input type="text" id="vorname" /></label>
-    <label>Nachname:<input type="text" id="nachname" /></label>
-    <label>Flugtyp:<select id="flugtyp">
-      <option value="Flug nach Hause">Flug nach Hause</option>
-      <option value="Flug nach Arbeit">Flug nach Arbeit</option>
-    </select></label>
-    <label>Flugnummer:<input type="text" id="flugnummer" /></label>
-    <label>Datum:<input type="date" id="datum" /></label>
-    <label>Abflug:<input type="time" id="abflug" /></label>
-    <label>Ankunft:<input type="time" id="ankunft" /></label>
+    <label>Vorname / First Name:<input type="text" id="vorname" /></label>
+    <label>Nachname / Last Name:<input type="text" id="nachname" /></label>
+    <label>Flugtyp / Flight Type:
+      <select id="flugtyp">
+        <option value="Flug nach Hause">Flug nach Hause / Flight Home</option>
+        <option value="Flug nach Arbeit">Flug nach Arbeit / Flight to Work</option>
+      </select>
+    </label>
+    <label>Datum / Date:<input type="date" id="datum" /></label>
+    <label>Abflug / Departure Time:<input type="time" id="abflug" /></label>
+    <label>Ankunft / Arrival Time:<input type="time" id="ankunft" /></label>
   </form>
 
   <script>
@@ -42,15 +44,15 @@
         .then(({ data: { text } }) => {
           console.log("OCR Ergebnis:", text);
 
-          const flugnummer = text.match(/LH\d+/)?.[0] || "";
           const abflug = text.match(/\b(\d{2}:\d{2})\b/)?.[1] || "";
           const zeiten = [...text.matchAll(/\b(\d{2}:\d{2})\b/g)];
           const ankunft = zeiten?.[1]?.[1] || "";
-          const datumRaw = text.match(/\d{2}\.\s?[A-Za-zäöüÄÖÜ]+\s?\d{4}/)?.[0] || "";
+
+          const datumRaw = text.match(/(\d{2})\.\s?([A-Za-zäöüÄÖÜ]+)\s?(\d{4})/) || [];
           const datum = formatDate(datumRaw);
+
           const ziel = text.match(/\b(BEY|FRA|BER|MUC|HAM|STR|DUS|CGN|NUE|HAJ|LEJ)\b/)?.[1] || "";
 
-          document.getElementById('flugnummer').value = flugnummer;
           document.getElementById('abflug').value = abflug;
           document.getElementById('ankunft').value = ankunft;
           document.getElementById('datum').value = datum;
@@ -60,14 +62,17 @@
         });
     }
 
-    function formatDate(datumText) {
-      const map = { Jan: '01', Feb: '02', Mär: '03', Mar: '03', Apr: '04', Mai: '05', Jun: '06', Jul: '07',
-                    Aug: '08', Sep: '09', Okt: '10', Oct: '10', Nov: '11', Dez: '12', Dec: '12' };
-      const match = datumText.match(/(\d{2})\.\s?([A-Za-zäöüÄÖÜ]+)\s?(\d{4})/);
-      if (!match) return "";
-      const tag = match[1];
-      const monat = map[match[2].slice(0,3)] || "01";
-      const jahr = match[3];
+    function formatDate(matchArr) {
+      if (!matchArr || matchArr.length < 4) return "";
+      const tag = matchArr[1];
+      const monatText = matchArr[2].slice(0, 3).toLowerCase();
+      const jahr = matchArr[3];
+      const monate = {
+        jan: '01', feb: '02', mär: '03', mar: '03', apr: '04',
+        mai: '05', jun: '06', jul: '07', aug: '08',
+        sep: '09', okt: '10', oct: '10', nov: '11', dez: '12', dec: '12'
+      };
+      const monat = monate[monatText] || "01";
       return `${jahr}-${monat}-${tag}`;
     }
   </script>
