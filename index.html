@@ -1,106 +1,199 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Flugdaten Formular</title>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.1/dist/tesseract.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; margin: 40px; }
-    h2 { margin-bottom: 10px; }
-    label { display: block; margin-top: 15px; font-weight: bold; }
-    input {
-      padding: 5px;
-      width: 300px;
-      font-size: 14px;
-      margin-top: 5px;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background-color: #f0f4f8;
+      color: #333;
     }
-    #preview {
-      margin-top: 20px;
-      max-width: 400px;
+    header {
+      display: flex;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #003366;
+      color: white;
+    }
+    header img {
+      height: 50px;
+      margin-left: auto;
+    }
+    main {
+      max-width: 500px;
+      margin: 30px auto;
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      color: #003366;
+    }
+    label {
+      margin-top: 15px;
+      display: block;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
       border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
     }
-    .readonly {
-      background-color: #eee;
+    input[readonly] {
+      background-color: #f1f1f1;
+    }
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .dual-fields {
+      display: flex;
+      gap: 10px;
+    }
+    .dual-fields input {
+      flex: 1;
     }
   </style>
 </head>
 <body>
 
-  <h2>Flugdaten Formular</h2>
+  <header>
+    <h2>Flugdaten Formular</h2>
+    <img src="Diebel Flug1.png" alt="Logo">
+  </header>
 
-  <label>Vorname / First Name</label>
-  <input type="text" id="vorname">
+  <main>
+    <form id="flugForm">
+      <label>Vorname / First Name:
+        <input type="text" id="vorname" required />
+      </label>
+      <label>Nachname / Last Name:
+        <input type="text" id="nachname" required />
+      </label>
 
-  <label>Nachname / Last Name</label>
-  <input type="text" id="nachname">
+      <label>Flugticket / Upload Ticket:
+        <input type="file" id="ticketImage" accept="image/*" />
+      </label>
 
-  <label>Bild der Flugbuchung hochladen</label>
-  <input type="file" id="imageInput" accept="image/*">
-  <img id="preview" src="#" alt="Vorschau" style="display:none;">
+      <label>Datum / Date:
+        <input type="text" id="datum" readonly />
+      </label>
 
-  <label>Datum / Date</label>
-  <input type="text" id="datum" class="readonly" readonly>
+      <div class="dual-fields">
+        <div>
+          <label>Von / From:
+            <input type="text" id="von" readonly />
+          </label>
+        </div>
+        <div>
+          <label>Nach / To:
+            <input type="text" id="nach" readonly />
+          </label>
+        </div>
+      </div>
 
-  <label>Von / From</label>
-  <input type="text" id="from" class="readonly" readonly>
+      <label>Flugtyp / Flight Type:
+        <input type="text" id="flugtyp" readonly />
+      </label>
 
-  <label>Nach / To</label>
-  <input type="text" id="to" class="readonly" readonly>
+      <label>Abflug / Departure:
+        <input type="text" id="abflug" readonly />
+      </label>
 
-  <label>Abflugzeit / Departure Time</label>
-  <input type="text" id="departure" class="readonly" readonly>
+      <label>Ankunft / Arrival:
+        <input type="text" id="ankunft" readonly />
+      </label>
 
-  <label>Ankunftszeit / Arrival Time</label>
-  <input type="text" id="arrival" class="readonly" readonly>
-
-  <label>Flugtyp / Flight Type</label>
-  <input type="text" id="flugtyp" class="readonly" readonly>
+      <button type="button" onclick="sendeMail()">📧 E-Mail erstellen</button>
+    </form>
+  </main>
 
   <script>
-    const germanAirports = ["FRA", "MUC", "BER", "HAM", "STR", "DUS", "CGN", "NUE", "HAJ", "LEJ", "DRS", "BRE", "DTM"];
+    const deutscheStädte = ['frankfurt', 'münchen', 'berlin', 'düsseldorf', 'hamburg', 'stuttgart', 'nürnberg', 'köln', 'bremen', 'leipzig'];
 
-    document.getElementById("imageInput").addEventListener("change", async function (e) {
+    document.getElementById('ticketImage').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
-      reader.onload = async function (event) {
-        const imageUrl = event.target.result;
-        document.getElementById("preview").src = imageUrl;
-        document.getElementById("preview").style.display = "block";
-
-        const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng+deu', {
-          logger: m => console.log(m)
-        });
-
-        console.log("Erkannter Text:", text);
+      reader.onload = async function () {
+        const imageUrl = reader.result;
+        const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng+deu');
 
         // Datum erkennen
-        const dateRegex = /(\d{1,2}[.\s]*(?:Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)[a-z]*[.\s]*\d{4})/i;
+        const dateRegex = /(\d{1,2})[.\s]*(Jan|Feb|Mär|Mar|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Oct|Nov|Dez|Dec)[a-z]*[.\s,]*(\d{4})/i;
         const dateMatch = text.match(dateRegex);
-        document.getElementById("datum").value = dateMatch ? dateMatch[0].replace(/\s+/g, ' ').trim() : "";
+        if (dateMatch) {
+          const day = dateMatch[1].padStart(2, '0');
+          const monthStr = dateMatch[2].substring(0, 3).toLowerCase();
+          const year = dateMatch[3];
+          const monthMap = {
+            jan: '01', feb: '02', mär: '03', mar: '03', apr: '04', mai: '05', jun: '06',
+            jul: '07', aug: '08', sep: '09', okt: '10', oct: '10', nov: '11', dez: '12', dec: '12'
+          };
+          const month = monthMap[monthStr] || '00';
+          document.getElementById("datum").value = `${day}.${month}.${year}`;
+        }
 
-        // Flughafencodes erkennen
-        const codes = [...new Set(text.match(/\b[A-Z]{3}\b/g))];
-        const fromCode = codes[0] || "";
-        const toCode = codes[1] || "";
+        // Flughäfen erkennen
+        const vonMatch = text.match(/(?:from|von)[:\s]*([A-Z]{3})/i);
+        const nachMatch = text.match(/(?:to|nach)[:\s]*([A-Z]{3})/i);
+        const von = vonMatch ? vonMatch[1] : "";
+        const nach = nachMatch ? nachMatch[1] : "";
 
-        document.getElementById("from").value = fromCode;
-        document.getElementById("to").value = toCode;
-
-        // Uhrzeiten erkennen (16:50, 20:15 etc.)
-        const timeRegex = /\b([01]?\d|2[0-3]):[0-5]\d\b/g;
-        const times = text.match(timeRegex);
-        document.getElementById("departure").value = times && times[0] ? times[0] : "";
-        document.getElementById("arrival").value = times && times[1] ? times[1] : "";
+        document.getElementById("von").value = von;
+        document.getElementById("nach").value = nach;
 
         // Flugtyp bestimmen
-        const flugtyp = germanAirports.includes(toCode) ? "Flug nach Arbeit / Flight to Work" : "Flug nach Hause / Flight Home";
-        document.getElementById("flugtyp").value = flugtyp;
+        const isGermany = deutscheStädte.some(city => text.toLowerCase().includes(city));
+        document.getElementById("flugtyp").value = isGermany ? "Flug nach Arbeit / Flight to Work" : "Flug nach Hause / Flight Home";
+
+        // Uhrzeiten
+        const timeMatches = [...text.matchAll(/\b([01]?[0-9]|2[0-3])[:.]([0-5][0-9])\b/g)];
+        if (timeMatches.length >= 2) {
+          document.getElementById("abflug").value = `${timeMatches[0][1]}:${timeMatches[0][2]}`;
+          document.getElementById("ankunft").value = `${timeMatches[1][1]}:${timeMatches[1][2]}`;
+        }
       };
       reader.readAsDataURL(file);
     });
-  </script>
 
+    function sendeMail() {
+      const empfaenger = "flugplanung@firma.de";
+      const betreff = "Flugdaten automatisch erfasst";
+      const text = `
+Vorname: ${document.getElementById("vorname").value}
+Nachname: ${document.getElementById("nachname").value}
+Datum: ${document.getElementById("datum").value}
+Von: ${document.getElementById("von").value}
+Nach: ${document.getElementById("nach").value}
+Flugtyp: ${document.getElementById("flugtyp").value}
+Abflug: ${document.getElementById("abflug").value}
+Ankunft: ${document.getElementById("ankunft").value}
+`;
+
+      const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
+      window.location.href = mailtoLink;
+    }
+  </script>
 </body>
 </html>
