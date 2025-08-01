@@ -14,40 +14,42 @@
 
     header {
       background-color: #DAF2D0;
-      padding: 20px;
+      padding: 25px 20px;
       text-align: center;
     }
 
     header img {
-      height: 60px;
+      height: 70px;
     }
 
     main {
-      max-width: 600px;
+      max-width: 700px;
       margin: 30px auto;
       background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      padding: 35px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     h2 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      font-size: 24px;
     }
 
     label {
       display: block;
-      margin-top: 15px;
+      margin-top: 18px;
       font-weight: bold;
+      font-size: 15px;
     }
 
     input {
-      padding: 10px;
+      padding: 12px;
       width: 100%;
-      font-size: 15px;
-      margin-top: 5px;
-      border-radius: 6px;
+      font-size: 16px;
+      margin-top: 6px;
+      border-radius: 8px;
       border: 1px solid #ccc;
     }
 
@@ -63,14 +65,14 @@
     }
 
     button {
-      margin-top: 25px;
+      margin-top: 30px;
       width: 100%;
-      padding: 12px;
+      padding: 14px;
       background-color: #007bff;
       color: white;
-      font-size: 16px;
+      font-size: 17px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
     }
 
@@ -152,7 +154,6 @@
           document.getElementById("datum").value = `${tag}.${monat}.${jahr}`;
         }
 
-        // Flughafencodes erkennen
         const codes = [...new Set(text.match(/\b[A-Z]{3}\b/g))];
         const fromCode = codes[0] || "";
         const toCode = codes[1] || "";
@@ -160,13 +161,11 @@
         document.getElementById("from").value = fromCode;
         document.getElementById("to").value = toCode;
 
-        // Uhrzeiten erkennen
         const timeRegex = /\b([01]?\d|2[0-3]):[0-5]\d\b/g;
         const times = text.match(timeRegex);
         document.getElementById("departure").value = times && times[0] ? times[0] : "";
         document.getElementById("arrival").value = times && times[1] ? times[1] : "";
 
-        // Flugtyp bestimmen
         const flugtyp = germanAirports.includes(toCode) ? "Flug nach Arbeit / Flight to Work" : "Flug nach Hause / Flight Home";
         document.getElementById("flugtyp").value = flugtyp;
       };
@@ -174,8 +173,8 @@
     });
 
     function generateEmail() {
-      const to = "flugplanung@firma.de";
-      const subject = "Flugdaten automatisch erfasst";
+      const to = "anwar.abosaad@diebel-spedition.de";
+      const subject = "Flug/Flight";
       const body = `
 Vorname: ${document.getElementById("vorname").value}
 Nachname: ${document.getElementById("nachname").value}
