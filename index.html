@@ -59,43 +59,50 @@
   <script>
     const deutscheStadtCodes = ["FRA", "BER", "MUC", "HAM", "STR", "DUS", "CGN", "NUE", "HAJ", "LEJ"];
 
-    function verarbeiteBild(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+   function verarbeiteBild(event) {
+  const file = event.target.files[0];
+  if (!file) return;
 
-      const img = document.getElementById('preview');
-      img.src = URL.createObjectURL(file);
-      img.style.display = "block";
+  const img = document.getElementById('preview');
+  img.src = URL.createObjectURL(file);
+  img.style.display = "block";
 
-      Tesseract.recognize(file, 'eng', { logger: m => console.log(m) })
-        .then(({ data: { text } }) => {
-          console.log("OCR Ergebnis:", text);
+  img.onload = () => {
+    Tesseract.recognize(img, 'eng', { logger: m => console.log(m) })
+      .then(({ data: { text } }) => {
+        console.log("OCR Ergebnis:", text);
 
-          // Datum extrahieren
-          const datumMatch = text.match(/(\d{1,2}\.\s?\w+\s?20\d{2})/); // z. B. 30. Aug 2025
-          if (datumMatch) {
-            const parsedDate = new Date(datumMatch[1]);
-            if (!isNaN(parsedDate)) {
-              document.getElementById('datum').value = parsedDate.toISOString().split('T')[0];
-            }
+        // Datum extrahieren
+        const datumMatch = text.match(/(\d{1,2}\.\s?\w+\s?20\d{2})/); // z. B. 30. Aug 2025
+        if (datumMatch) {
+          const parsedDate = new Date(datumMatch[1]);
+          if (!isNaN(parsedDate)) {
+            document.getElementById('datum').value = parsedDate.toISOString().split('T')[0];
           }
+        }
 
-          // Abflugzeit
-          const abflugMatch = text.match(/Scheduled\s+(\d{1,2}:\d{2})/);
-          if (abflugMatch) document.getElementById('abflug').value = abflugMatch[1];
+        // Abflugzeit
+        const abflugMatch = text.match(/Scheduled\s+(\d{1,2}:\d{2})/);
+        if (abflugMatch) document.getElementById('abflug').value = abflugMatch[1];
 
-          // Ankunftzeit: zweite Uhrzeit
-          const zeiten = [...text.matchAll(/(\d{1,2}:\d{2})/g)].map(m => m[1]);
-          if (zeiten.length >= 2) document.getElementById('ankunft').value = zeiten[1];
+        // Ankunftzeit: zweite Uhrzeit
+        const zeiten = [...text.matchAll(/(\d{1,2}:\d{2})/g)].map(m => m[1]);
+        if (zeiten.length >= 2) document.getElementById('ankunft').value = zeiten[1];
 
-          // Flugtyp ermitteln
-          const allCodes = [...text.matchAll(/\b[A-Z]{3}\b/g)].map(m => m[0]);
-          const ziel = allCodes[1] || "";
-          const isArbeit = deutscheStadtCodes.includes(ziel);
-          const flugtypElem = document.getElementById('flugtyp');
-          flugtypElem.value = isArbeit ? "Flug nach Arbeit" : "Flug nach Hause";
-        });
-    }
+        // Flugtyp automatisch erkennen
+        const deutscheStadtCodes = ["FRA", "BER", "MUC", "HAM", "STR", "DUS", "CGN", "NUE", "HAJ", "LEJ"];
+        const allCodes = [...text.matchAll(/\b[A-Z]{3}\b/g)].map(m => m[0]);
+        const ziel = allCodes[1] || "";
+        const isArbeit = deutscheStadtCodes.includes(ziel);
+        const flugtypElem = document.getElementById('flugtyp');
+        flugtypElem.value = isArbeit ? "Flug nach Arbeit" : "Flug nach Hause";
+      })
+      .catch(err => {
+        console.error("Fehler bei der OCR:", err);
+        alert("Die Flugdaten konnten nicht erkannt werden. Bitte anderes Bild versuchen.");
+      });
+  };
+}
 
     function sendeMail() {
       const vorname = document.getElementById("vorname").value;
