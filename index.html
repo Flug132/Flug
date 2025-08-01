@@ -97,7 +97,26 @@
         const { data: { text } } = await worker.recognize(imageData);
 
         // Beispielhafte Extraktion
-        const datum = text.match(/\b\d{2}\.\d{2}\.\d{4}\b/)?.[0] || "";
+        let datum = "";
+const datumMatch = text.match(/\b\d{2}[./ -]?(0[1-9]|1[0-2]|[A-Z]{3})[./ -]?\d{2,4}\b/i);
+
+if (datumMatch) {
+  const raw = datumMatch[0].replace(/[^A-Z0-9]/gi, "").toUpperCase();
+
+  const monate = {
+    JAN: "01", FEB: "02", MAR: "03", APR: "04", MAY: "05", JUN: "06",
+    JUL: "07", AUG: "08", SEP: "09", OCT: "10", NOV: "11", DEC: "12"
+  };
+
+  let tag = raw.slice(0, 2);
+  let monat = raw.slice(2, 5);
+  let jahr = raw.slice(5);
+
+  if (monate[monat]) monat = monate[monat];
+  if (jahr.length === 2) jahr = "20" + jahr;
+
+  datum = ${jahr}-${monat}-${tag}; // YYYY-MM-DD für HTML input
+}
         const abflug = text.match(/\b\d{2}:\d{2}\b/)?.[0] || "";
         const ankunft = (text.match(/\b\d{2}:\d{2}\b/g) || [])[1] || "";
 
