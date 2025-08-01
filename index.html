@@ -1,77 +1,106 @@
-<script>
-  const deutscheFlughaefen = [
-    "Berlin", "Frankfurt", "München", "Munich", "Hamburg", "Stuttgart",
-    "Düsseldorf", "Köln", "Cologne", "Hannover", "Nürnberg", "Leipzig"
-  ];
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Flugdaten Formular</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; }
+    h2 { margin-bottom: 10px; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input {
+      padding: 5px;
+      width: 300px;
+      font-size: 14px;
+      margin-top: 5px;
+    }
+    #preview {
+      margin-top: 20px;
+      max-width: 400px;
+      border: 1px solid #ccc;
+    }
+    .readonly {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
 
-  document.getElementById("bildInput").addEventListener("change", async function () {
-    const file = this.files[0];
-    if (!file) return;
+  <h2>Flugdaten Formular</h2>
 
-    document.getElementById("preview").src = URL.createObjectURL(file);
-    const result = await Tesseract.recognize(file, 'eng+deu');
-    const text = result.data.text;
-    console.log("OCR Text:", text);
+  <label>Vorname / First Name</label>
+  <input type="text" id="vorname">
 
-    // Datum z. B. 20. Sep 2025
-    const dateMatch = text.match(/(\d{1,2})[.\s-]*([A-ZÄÖÜa-zäöü]{3,})[.\s-]*(\d{4})/);
-    if (dateMatch) {
-      const [_, tag, monatRaw, jahr] = dateMatch;
-      const monate = {
-        jan: "01", feb: "02", mär: "03", mar: "03", apr: "04", mai: "05", may: "05",
-        jun: "06", jul: "07", aug: "08", sep: "09", okt: "10", oct: "10", nov: "11", dez: "12", dec: "12"
+  <label>Nachname / Last Name</label>
+  <input type="text" id="nachname">
+
+  <label>Bild der Flugbuchung hochladen</label>
+  <input type="file" id="imageInput" accept="image/*">
+  <img id="preview" src="#" alt="Vorschau" style="display:none;">
+
+  <label>Datum / Date</label>
+  <input type="text" id="datum" class="readonly" readonly>
+
+  <label>Von / From</label>
+  <input type="text" id="from" class="readonly" readonly>
+
+  <label>Nach / To</label>
+  <input type="text" id="to" class="readonly" readonly>
+
+  <label>Abflugzeit / Departure Time</label>
+  <input type="text" id="departure" class="readonly" readonly>
+
+  <label>Ankunftszeit / Arrival Time</label>
+  <input type="text" id="arrival" class="readonly" readonly>
+
+  <label>Flugtyp / Flight Type</label>
+  <input type="text" id="flugtyp" class="readonly" readonly>
+
+  <script>
+    const germanAirports = ["FRA", "MUC", "BER", "HAM", "STR", "DUS", "CGN", "NUE", "HAJ", "LEJ", "DRS", "BRE", "DTM"];
+
+    document.getElementById("imageInput").addEventListener("change", async function (e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function (event) {
+        const imageUrl = event.target.result;
+        document.getElementById("preview").src = imageUrl;
+        document.getElementById("preview").style.display = "block";
+
+        const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng+deu', {
+          logger: m => console.log(m)
+        });
+
+        console.log("Erkannter Text:", text);
+
+        // Datum erkennen
+        const dateRegex = /(\d{1,2}[.\s]*(?:Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)[a-z]*[.\s]*\d{4})/i;
+        const dateMatch = text.match(dateRegex);
+        document.getElementById("datum").value = dateMatch ? dateMatch[0].replace(/\s+/g, ' ').trim() : "";
+
+        // Flughafencodes erkennen
+        const codes = [...new Set(text.match(/\b[A-Z]{3}\b/g))];
+        const fromCode = codes[0] || "";
+        const toCode = codes[1] || "";
+
+        document.getElementById("from").value = fromCode;
+        document.getElementById("to").value = toCode;
+
+        // Uhrzeiten erkennen (16:50, 20:15 etc.)
+        const timeRegex = /\b([01]?\d|2[0-3]):[0-5]\d\b/g;
+        const times = text.match(timeRegex);
+        document.getElementById("departure").value = times && times[0] ? times[0] : "";
+        document.getElementById("arrival").value = times && times[1] ? times[1] : "";
+
+        // Flugtyp bestimmen
+        const flugtyp = germanAirports.includes(toCode) ? "Flug nach Arbeit / Flight to Work" : "Flug nach Hause / Flight Home";
+        document.getElementById("flugtyp").value = flugtyp;
       };
-      const monat = monate[monatRaw.toLowerCase().slice(0, 3)];
-      if (monat) {
-        const datum = `${jahr}-${monat}-${tag.padStart(2, '0')}`;
-        document.getElementById("datum").value = datum;
-      }
-    }
+      reader.readAsDataURL(file);
+    });
+  </script>
 
-    // Abflug- und Ankunftszeiten (erste zwei Uhrzeiten im Text)
-    const zeiten = text.match(/\b\d{1,2}[:.]\d{2}\b/g);
-    if (zeiten?.length >= 2) {
-      document.getElementById("abflug").value = zeiten[0].replace(".", ":");
-      document.getElementById("ankunft").value = zeiten[1].replace(".", ":");
-    }
-
-    // Von/Nach: Flughafencodes + Städtenamen suchen
-    let from = "", to = "";
-    if (/BEY/i.test(text)) from = "Beirut";
-    if (/FRA/i.test(text)) to = "Frankfurt";
-    if (/Beirut/i.test(text)) from = "Beirut";
-    if (/Frankfurt/i.test(text)) to = "Frankfurt";
-
-    document.getElementById("von").value = from;
-    document.getElementById("nach").value = to;
-
-    // Flugtyp bestimmen
-    const flugtyp = deutscheFlughaefen.some(city => to.toLowerCase().includes(city.toLowerCase()))
-      ? "Flug nach Arbeit / Flight to Work"
-      : "Flug nach Hause / Flight Home";
-    document.getElementById("flugtyp").value = flugtyp;
-  });
-
-  function sendeMail() {
-    const empfaenger = "anwar.abosaad@diebel-spedition.de";
-    const betreff = "Flugdaten";
-
-    const text = `Hallo,
-
-Hier sind die Flugdaten:
-
-Vorname: ${document.getElementById("vorname").value}
-Nachname: ${document.getElementById("nachname").value}
-Flugtyp: ${document.getElementById("flugtyp").value}
-Von: ${document.getElementById("von").value}
-Nach: ${document.getElementById("nach").value}
-Datum: ${document.getElementById("datum").value}
-Abflug: ${document.getElementById("abflug").value}
-Ankunft: ${document.getElementById("ankunft").value}
-
-Viele Grüße`;
-
-    const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
-    window.location.href = mailtoLink;
-  }
-</script>
+</body>
+</html>
