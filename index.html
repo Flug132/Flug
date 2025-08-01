@@ -3,25 +3,53 @@
 <head>
   <meta charset="UTF-8" />
   <title>Flugdaten Formular</title>
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    label { display: block; margin-top: 10px; font-weight: bold; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+    }
     input, select {
-      width: 100%; padding: 8px; margin-top: 4px;
-      box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc;
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+      font-size: 16px;
     }
-    input[readonly] { background-color: #f0f0f0; color: #555; }
+    input[readonly], select[disabled] {
+      background-color: #f0f0f0;
+      color: #333;
+    }
     button {
-      margin-top: 20px; padding: 10px; width: 100%;
-      background-color: #007bff; color: white;
-      border: none; font-size: 16px; border-radius: 5px;
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
     }
-    #preview { margin-top: 10px; max-width: 100%; height: auto; }
+    img#preview {
+      max-width: 100%;
+      margin-top: 10px;
+      border: 1px solid #ccc;
+    }
     .header {
-      display: flex; justify-content: space-between; align-items: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header h2 {
+      margin: 0;
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
 </head>
 <body>
   <div class="header">
@@ -30,19 +58,19 @@
   </div>
 
   <form id="flugForm">
-    <label for="vorname">Vorname / First Name:
+    <label>Vorname / First Name:
       <input type="text" id="vorname" required />
     </label>
-    <label for="nachname">Nachname / Last Name:
+    <label>Nachname / Last Name:
       <input type="text" id="nachname" required />
     </label>
 
-    <label>Flugticket hochladen / Upload flight ticket (Bild):
-      <input type="file" id="bildInput" accept="image/*" />
+    <label>Flugticket / Flight Ticket (Bild hochladen):
+      <input type="file" id="bildInput" accept="image/*" required />
     </label>
-    <img id="preview" />
+    <img id="preview" src="" alt="Bildvorschau" />
 
-    <label>Flugtyp / Flight type:
+    <label>Flugtyp / Flight Type:
       <input type="text" id="flugtyp" readonly />
     </label>
     <label>Datum / Date:
@@ -55,7 +83,7 @@
       <input type="time" id="ankunft" readonly />
     </label>
 
-    <button type="button" onclick="sendeMail()">📧 E-Mail senden / Send E-Mail</button>
+    <button type="button" onclick="sendeMail()">📧 E-Mail senden</button>
   </form>
 
   <script>
@@ -68,64 +96,71 @@
 
       const result = await Tesseract.recognize(file, "eng+deu", { logger: m => console.log(m) });
       const text = result.data.text;
-      console.log("OCR-Text:", text);
+      console.log("OCR TEXT:", text);
 
-      const fromMatch = text.match(/From\s+([A-ZÄÖÜa-zäöü ]+)/i);
-      const toMatch = text.match(/To\s+([A-ZÄÖÜa-zäöü ]+)/i);
-      const dateMatch = text.match(/\b\d{2}[A-Z]{3}\d{2,4}\b/i);
-      const depMatch = text.match(/\b\d{2}[:.]\d{2}\b/g);
+      // Flugtyp erkennen
+      const fromMatch = text.match(/From\s+([A-ZÄÖÜa-zäöü \-]+)/i);
+      const toMatch = text.match(/To\s+([A-ZÄÖÜa-zäöü \-]+)/i);
+      const deutscheStädte = ["Berlin", "Hamburg", "München", "Munich", "Frankfurt", "Cologne", "Köln", "Düsseldorf", "Leipzig", "Stuttgart"];
 
+      let flugtyp = "";
+      const fromCity = fromMatch?.[1]?.trim() || "";
       const toCity = toMatch?.[1]?.trim() || "";
-      const deutscheStädte = ["Berlin", "Hamburg", "München", "Stuttgart", "Frankfurt", "Leipzig", "Köln", "Düsseldorf"];
-      const flugtyp = deutscheStädte.some(stadt => toCity.toLowerCase().includes(stadt.toLowerCase())) ? "Flug nach Arbeit" : "Flug nach Hause";
+
+      if (deutscheStädte.some(city => toCity.toLowerCase().includes(city.toLowerCase()))) {
+        flugtyp = "Flug nach Arbeit";
+      } else if (deutscheStädte.some(city => fromCity.toLowerCase().includes(city.toLowerCase()))) {
+        flugtyp = "Flug nach Hause";
+      } else {
+        flugtyp = "Nicht erkennbar";
+      }
       document.getElementById("flugtyp").value = flugtyp;
 
+      // Datum erkennen
+      const dateMatch = text.match(/\b(\d{1,2})\s?([A-Z]{3})\s?(\d{2,4})\b/i) || text.match(/\b(\d{2})([A-Z]{3})(\d{2,4})\b/i);
       if (dateMatch) {
-        let d = dateMatch[0].toUpperCase(); // z. B. 01AUG25
+        const tag = dateMatch[1].padStart(2, "0");
+        const monatText = dateMatch[2].toUpperCase();
+        let jahr = dateMatch[3];
+        if (jahr.length === 2) jahr = "20" + jahr;
+
         const monate = {
           JAN: "01", FEB: "02", MAR: "03", APR: "04", MAY: "05", JUN: "06",
           JUL: "07", AUG: "08", SEP: "09", OCT: "10", NOV: "11", DEC: "12"
         };
-        const tag = d.slice(0, 2);
-        const monatText = d.slice(2, 5);
-        let jahr = d.slice(5);
-        if (jahr.length === 2) jahr = "20" + jahr;
+
         if (monate[monatText]) {
           const monat = monate[monatText];
           document.getElementById("datum").value = `${jahr}-${monat}-${tag}`;
         }
       }
 
-      if (depMatch && depMatch.length >= 2) {
-        document.getElementById("abflug").value = depMatch[0].replace(".", ":");
-        document.getElementById("ankunft").value = depMatch[1].replace(".", ":");
+      // Abflug + Ankunft erkennen
+      const timeMatches = text.match(/\b\d{1,2}[:.]\d{2}\b/g);
+      if (timeMatches && timeMatches.length >= 2) {
+        document.getElementById("abflug").value = timeMatches[0].replace(".", ":").padStart(5, "0");
+        document.getElementById("ankunft").value = timeMatches[1].replace(".", ":").padStart(5, "0");
       }
     });
 
     function sendeMail() {
-      const empfaenger = "flugplanung@firma.de";
-      const betreff = "Flug";
-      const name = document.getElementById("vorname").value;
-      const nachname = document.getElementById("nachname").value;
-      const flugtyp = document.getElementById("flugtyp").value;
-      const datum = document.getElementById("datum").value;
-      const abflug = document.getElementById("abflug").value;
-      const ankunft = document.getElementById("ankunft").value;
+      const empfaenger = "anwar.abosaad@diebel-spedition.de";
+      const betreff = "Flugdaten";
 
-      const body = `Hallo,
+      const text = `Hallo,
 
-anbei ist mein Flug:
+Hier sind die Flugdaten:
 
-Vorname / First Name: ${name}
-Nachname / Last Name: ${nachname}
-Flugtyp / Flight Type: ${flugtyp}
-Datum / Date: ${datum}
-Abflug / Departure: ${abflug}
-Ankunft / Arrival: ${ankunft}
+Vorname: ${document.getElementById("vorname").value}
+Nachname: ${document.getElementById("nachname").value}
+Flugtyp: ${document.getElementById("flugtyp").value}
+Datum: ${document.getElementById("datum").value}
+Abflug: ${document.getElementById("abflug").value}
+Ankunft: ${document.getElementById("ankunft").value}
 
 Viele Grüße`;
 
-      const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(body)}`;
+      const mailtoLink = `mailto:${empfaenger}?subject=${encodeURIComponent(betreff)}&body=${encodeURIComponent(text)}`;
       window.location.href = mailtoLink;
     }
   </script>
