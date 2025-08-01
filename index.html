@@ -1,36 +1,39 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flugdaten Formular</title>
   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
   <style>
     :root {
-      --bg-light: #DAF2D0;
+      --green-bg: #DAF2D0;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       font-family: Arial, sans-serif;
-      background-color: #f4f6f8;
+      background-color: #f5f7f9;
       margin: 0;
       padding: 0;
     }
 
     header {
-      background-color: var(--bg-light);
-      padding: 20px 10px;
+      background-color: var(--green-bg);
       text-align: center;
+      padding: 16px 10px;
     }
 
     header img {
-      max-height: 60px;
-      width: auto;
+      height: 60px;
     }
 
     main {
-      max-width: 600px;
-      margin: 25px auto;
+      max-width: 800px;
+      margin: 20px auto;
       background: #fff;
       padding: 24px;
       border-radius: 16px;
@@ -43,21 +46,30 @@
       font-size: 22px;
     }
 
+    .row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      flex: 1 1 48%;
+      margin-bottom: 20px;
+    }
+
     label {
-      display: block;
-      margin-top: 18px;
       font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
       font-size: 15px;
     }
 
-    input {
-      padding: 14px;
+    input[type="text"], input[type="file"] {
       width: 100%;
-      font-size: 16px;
-      margin-top: 6px;
-      border-radius: 8px;
+      padding: 12px;
+      font-size: 15px;
       border: 1px solid #ccc;
-      box-sizing: border-box;
+      border-radius: 8px;
     }
 
     .readonly {
@@ -65,20 +77,25 @@
     }
 
     #preview {
-      margin-top: 15px;
-      max-width: 100%;
       display: none;
-      border: 1px solid #ccc;
+      max-width: 100%;
+      margin: 10px 0;
       border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .footer {
+      background-color: var(--green-bg);
+      padding: 20px;
+      text-align: center;
+      border-radius: 0 0 16px 16px;
     }
 
     button {
-      margin-top: 30px;
-      width: 100%;
-      padding: 14px;
+      padding: 14px 30px;
+      font-size: 16px;
       background-color: #007bff;
       color: white;
-      font-size: 17px;
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -89,17 +106,12 @@
     }
 
     @media (max-width: 600px) {
-      main {
-        margin: 15px;
-        padding: 18px;
+      .field {
+        flex: 1 1 100%;
       }
 
-      input, button {
-        font-size: 15px;
-      }
-
-      h2 {
-        font-size: 20px;
+      header img {
+        height: 50px;
       }
     }
   </style>
@@ -107,42 +119,66 @@
 <body>
 
   <header>
-    <img src="Diebel Flug.png" alt="Logo">
+    <img src="Diebel Flug.png" alt="Logo" />
   </header>
 
   <main>
     <h2>Flugdaten Formular</h2>
 
-    <label>Vorname / First Name</label>
-    <input type="text" id="vorname">
+    <div class="row">
+      <div class="field">
+        <label>Vorname / First Name</label>
+        <input type="text" id="vorname" />
+      </div>
+      <div class="field">
+        <label>Nachname / Last Name</label>
+        <input type="text" id="nachname" />
+      </div>
+    </div>
 
-    <label>Nachname / Last Name</label>
-    <input type="text" id="nachname">
+    <div class="field">
+      <label>Flugbild hinzufügen / Add Flight Image</label>
+      <input type="file" id="imageInput" accept="image/*" />
+      <img id="preview" src="#" alt="Vorschau" />
+    </div>
 
-    <label>Bild der Flugbuchung hochladen</label>
-    <input type="file" id="imageInput" accept="image/*">
-    <img id="preview" src="#" alt="Vorschau">
+    <div class="row">
+      <div class="field">
+        <label>Datum / Date</label>
+        <input type="text" id="datum" class="readonly" readonly />
+      </div>
+      <div class="field">
+        <label>Flugtyp / Flight Type</label>
+        <input type="text" id="flugtyp" class="readonly" readonly />
+      </div>
+    </div>
 
-    <label>Datum / Date</label>
-    <input type="text" id="datum" class="readonly" readonly>
+    <div class="row">
+      <div class="field">
+        <label>Von / From</label>
+        <input type="text" id="from" class="readonly" readonly />
+      </div>
+      <div class="field">
+        <label>Nach / To</label>
+        <input type="text" id="to" class="readonly" readonly />
+      </div>
+    </div>
 
-    <label>Von / From</label>
-    <input type="text" id="from" class="readonly" readonly>
-
-    <label>Nach / To</label>
-    <input type="text" id="to" class="readonly" readonly>
-
-    <label>Abflugzeit / Departure Time</label>
-    <input type="text" id="departure" class="readonly" readonly>
-
-    <label>Ankunftszeit / Arrival Time</label>
-    <input type="text" id="arrival" class="readonly" readonly>
-
-    <label>Flugtyp / Flight Type</label>
-    <input type="text" id="flugtyp" class="readonly" readonly>
-
-    <button onclick="generateEmail()">📧 E-Mail generieren</button>
+    <div class="row">
+      <div class="field">
+        <label>Abflugzeit / Departure Time</label>
+        <input type="text" id="departure" class="readonly" readonly />
+      </div>
+      <div class="field">
+        <label>Ankunftszeit / Arrival Time</label>
+        <input type="text" id="arrival" class="readonly" readonly />
+      </div>
+    </div>
   </main>
+
+  <div class="footer">
+    <button onclick="generateEmail()">📧 Mail erstellen</button>
+  </div>
 
   <script>
     const germanAirports = ["FRA", "MUC", "BER", "HAM", "STR", "DUS", "CGN", "NUE", "HAJ", "LEJ", "DRS", "BRE", "DTM"];
@@ -154,8 +190,9 @@
       const reader = new FileReader();
       reader.onload = async function (event) {
         const imageUrl = event.target.result;
-        document.getElementById("preview").src = imageUrl;
-        document.getElementById("preview").style.display = "block";
+        const preview = document.getElementById("preview");
+        preview.src = imageUrl;
+        preview.style.display = "block";
 
         const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng+deu', {
           logger: m => console.log(m)
@@ -163,7 +200,7 @@
 
         console.log("Erkannter Text:", text);
 
-        // Datum erkennen & formatieren zu dd.mm.yyyy
+        // Datum erkennen (z.B. 15.Aug.2025 oder 15 Aug 2025)
         const dateRegex = /(\d{1,2})[.\s]*(Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)[a-z]*[.\s]*(\d{4})/i;
         const match = text.match(dateRegex);
         if (match) {
@@ -177,6 +214,7 @@
           document.getElementById("datum").value = `${tag}.${monat}.${jahr}`;
         }
 
+        // Flughafencodes
         const codes = [...new Set(text.match(/\b[A-Z]{3}\b/g))];
         const fromCode = codes[0] || "";
         const toCode = codes[1] || "";
@@ -184,12 +222,15 @@
         document.getElementById("from").value = fromCode;
         document.getElementById("to").value = toCode;
 
+        // Zeiten erkennen
         const timeRegex = /\b([01]?\d|2[0-3]):[0-5]\d\b/g;
         const times = text.match(timeRegex);
         document.getElementById("departure").value = times?.[0] || "";
         document.getElementById("arrival").value = times?.[1] || "";
 
-        const flugtyp = germanAirports.includes(toCode) ? "Flug nach Arbeit / Flight to Work" : "Flug nach Hause / Flight Home";
+        const flugtyp = germanAirports.includes(toCode)
+          ? "Flug nach Arbeit / Flight to Work"
+          : "Flug nach Hause / Flight Home";
         document.getElementById("flugtyp").value = flugtyp;
       };
       reader.readAsDataURL(file);
