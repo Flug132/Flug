@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>البحث عن المعازيم</title>
+  <style>
+    body {
+      font-family: "Tahoma", sans-serif;
+      background: #f9f9f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+    input {
+      padding: 10px;
+      width: 300px;
+      max-width: 90%;
+      font-size: 16px;
+      margin-bottom: 20px;
+      text-align: right;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 15px;
+      margin-bottom: 10px;
+      width: 300px;
+      text-align: right;
+    }
+    .no-results {
+      color: #777;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔎 البحث عن المعازيم</h1>
+  <input type="text" id="search" placeholder="اكتب الاسم هنا..." />
+
+  <div id="results"></div>
+
+  <script>
+    const guests = [
+      { name: "مازن", table: 1 },
+      { name: "انور", table: 1 },
+      { name: "عبدو", table: 1 },
+      { name: "محمد", table: 2 },
+      { name: "حسن", table: 2 },
+      { name: "عيسى", table: 3 },
+      { name: "حسام", table: 3 },
+      { name: "الجص", table: 3 },
+    ];
+
+    const searchInput = document.getElementById("search");
+    const resultsDiv = document.getElementById("results");
+
+    searchInput.addEventListener("input", function () {
+      const query = this.value.trim();
+      resultsDiv.innerHTML = "";
+
+      if (query) {
+        const filtered = guests.filter(g => g.name.includes(query));
+        if (filtered.length > 0) {
+          filtered.forEach(guest => {
+            const card = document.createElement("div");
+            card.className = "card";
+            card.innerHTML = `<p><strong>${guest.name}</strong></p>
+                              <p>الطاولة رقم ${guest.table}</p>`;
+            resultsDiv.appendChild(card);
+          });
+        } else {
+          resultsDiv.innerHTML = `<p class="no-results">لا يوجد نتائج</p>`;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
