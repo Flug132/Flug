@@ -31,6 +31,30 @@
       height: 60px;
     }
 
+    /* شريط الأعلام */
+    .lang-bar {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      padding: 10px;
+      background: #fff;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .lang-bar img {
+      width: 40px;
+      height: 28px;
+      cursor: pointer;
+      border-radius: 4px;
+      border: 2px solid transparent;
+      transition: 0.2s;
+    }
+
+    .lang-bar img:hover {
+      border: 2px solid #007bff;
+      transform: scale(1.1);
+    }
+
     main {
       max-width: 800px;
       margin: 20px auto;
@@ -113,22 +137,24 @@
       header img {
         height: 50px;
       }
+
+      .lang-bar img {
+        width: 32px;
+        height: 22px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <!-- Language Selector -->
-  <div style="text-align:right; margin:10px;">
-    <label for="langSelect">🌐 Sprache / Language:</label>
-    <select id="langSelect">
-      <option value="de">Deutsch</option>
-      <option value="en">English</option>
-      <option value="ar">العربية</option>
-      <option value="tr">Türkçe</option>
-      <option value="ro">Română</option>
-      <option value="pl">Polski</option>
-    </select>
+  <!-- شريط الأعلام -->
+  <div class="lang-bar">
+    <img src="https://flagcdn.com/w40/de.png" alt="Deutsch" onclick="setLanguage('de')" />
+    <img src="https://flagcdn.com/w40/gb.png" alt="English" onclick="setLanguage('en')" />
+    <img src="https://flagcdn.com/w40/sa.png" alt="العربية" onclick="setLanguage('ar')" />
+    <img src="https://flagcdn.com/w40/tr.png" alt="Türkçe" onclick="setLanguage('tr')" />
+    <img src="https://flagcdn.com/w40/ro.png" alt="Română" onclick="setLanguage('ro')" />
+    <img src="https://flagcdn.com/w40/pl.png" alt="Polski" onclick="setLanguage('pl')" />
   </div>
 
   <header>
@@ -140,50 +166,50 @@
 
     <div class="row">
       <div class="field">
-        <label for="vorname" id="lblVorname">Vorname / First Name</label>
+        <label for="vorname" id="lblVorname">Vorname</label>
         <input type="text" id="vorname" />
       </div>
       <div class="field">
-        <label for="nachname" id="lblNachname">Nachname / Last Name</label>
+        <label for="nachname" id="lblNachname">Nachname</label>
         <input type="text" id="nachname" />
       </div>
     </div>
 
     <div class="field">
-      <label for="imageInput" id="lblImage">Flugbild hinzufügen / Add Flight Image</label>
+      <label for="imageInput" id="lblImage">Flugbild hinzufügen</label>
       <input type="file" id="imageInput" accept="image/*" />
       <img id="preview" src="#" alt="Vorschau" />
     </div>
 
     <div class="row">
       <div class="field">
-        <label for="datum" id="lblDatum">Datum / Date</label>
+        <label for="datum" id="lblDatum">Datum</label>
         <input type="text" id="datum" class="readonly" readonly />
       </div>
       <div class="field">
-        <label for="flugtyp" id="lblFlugtyp">Flugtyp / Flight Type</label>
+        <label for="flugtyp" id="lblFlugtyp">Flugtyp</label>
         <input type="text" id="flugtyp" class="readonly" readonly />
       </div>
     </div>
 
     <div class="row">
       <div class="field">
-        <label for="from" id="lblFrom">Von / From</label>
+        <label for="from" id="lblFrom">Von</label>
         <input type="text" id="from" class="readonly" readonly />
       </div>
       <div class="field">
-        <label for="to" id="lblTo">Nach / To</label>
+        <label for="to" id="lblTo">Nach</label>
         <input type="text" id="to" class="readonly" readonly />
       </div>
     </div>
 
     <div class="row">
       <div class="field">
-        <label for="departure" id="lblDeparture">Abflugzeit / Departure Time</label>
+        <label for="departure" id="lblDeparture">Abflugzeit</label>
         <input type="text" id="departure" class="readonly" readonly />
       </div>
       <div class="field">
-        <label for="arrival" id="lblArrival">Ankunftszeit / Arrival Time</label>
+        <label for="arrival" id="lblArrival">Ankunftszeit</label>
         <input type="text" id="arrival" class="readonly" readonly />
       </div>
     </div>
@@ -194,89 +220,16 @@
   </div>
 
   <script>
-    // جميع الترجمات
+    // الترجمات
     const translations = {
-      de: {
-        title: "Flugdaten Formular",
-        fname: "Vorname",
-        lname: "Nachname",
-        addImg: "Flugbild hinzufügen",
-        date: "Datum",
-        flightType: "Flugtyp",
-        from: "Von",
-        to: "Nach",
-        dep: "Abflugzeit",
-        arr: "Ankunftszeit",
-        mailBtn: "📧 Mail erstellen"
-      },
-      en: {
-        title: "Flight Data Form",
-        fname: "First Name",
-        lname: "Last Name",
-        addImg: "Add Flight Image",
-        date: "Date",
-        flightType: "Flight Type",
-        from: "From",
-        to: "To",
-        dep: "Departure Time",
-        arr: "Arrival Time",
-        mailBtn: "📧 Generate Email"
-      },
-      ar: {
-        title: "نموذج بيانات الرحلة",
-        fname: "الاسم الأول",
-        lname: "اسم العائلة",
-        addImg: "إضافة صورة الرحلة",
-        date: "التاريخ",
-        flightType: "نوع الرحلة",
-        from: "من",
-        to: "إلى",
-        dep: "وقت الإقلاع",
-        arr: "وقت الوصول",
-        mailBtn: "📧 إنشاء بريد"
-      },
-      tr: {
-        title: "Uçuş Bilgi Formu",
-        fname: "Ad",
-        lname: "Soyad",
-        addImg: "Uçuş Görseli Ekle",
-        date: "Tarih",
-        flightType: "Uçuş Türü",
-        from: "Nereden",
-        to: "Nereye",
-        dep: "Kalkış Saati",
-        arr: "Varış Saati",
-        mailBtn: "📧 E-posta Oluştur"
-      },
-      ro: {
-        title: "Formular Date Zbor",
-        fname: "Prenume",
-        lname: "Nume",
-        addImg: "Adaugă Imagine Zbor",
-        date: "Data",
-        flightType: "Tip Zbor",
-        from: "De la",
-        to: "Către",
-        dep: "Ora Plecare",
-        arr: "Ora Sosire",
-        mailBtn: "📧 Creează Email"
-      },
-      pl: {
-        title: "Formularz Danych Lotu",
-        fname: "Imię",
-        lname: "Nazwisko",
-        addImg: "Dodaj Zdjęcie Lotu",
-        date: "Data",
-        flightType: "Rodzaj Lotu",
-        from: "Z",
-        to: "Do",
-        dep: "Czas Odlotu",
-        arr: "Czas Przylotu",
-        mailBtn: "📧 Utwórz Email"
-      }
+      de: {title:"Flugdaten Formular",fname:"Vorname",lname:"Nachname",addImg:"Flugbild hinzufügen",date:"Datum",flightType:"Flugtyp",from:"Von",to:"Nach",dep:"Abflugzeit",arr:"Ankunftszeit",mailBtn:"📧 Mail erstellen"},
+      en: {title:"Flight Data Form",fname:"First Name",lname:"Last Name",addImg:"Add Flight Image",date:"Date",flightType:"Flight Type",from:"From",to:"To",dep:"Departure Time",arr:"Arrival Time",mailBtn:"📧 Generate Email"},
+      ar: {title:"نموذج بيانات الرحلة",fname:"الاسم الأول",lname:"اسم العائلة",addImg:"إضافة صورة الرحلة",date:"التاريخ",flightType:"نوع الرحلة",from:"من",to:"إلى",dep:"وقت الإقلاع",arr:"وقت الوصول",mailBtn:"📧 إنشاء بريد"},
+      tr: {title:"Uçuş Bilgi Formu",fname:"Ad",lname:"Soyad",addImg:"Uçuş Görseli Ekle",date:"Tarih",flightType:"Uçuş Türü",from:"Nereden",to:"Nereye",dep:"Kalkış Saati",arr:"Varış Saati",mailBtn:"📧 E-posta Oluştur"},
+      ro: {title:"Formular Date Zbor",fname:"Prenume",lname:"Nume",addImg:"Adaugă Imagine Zbor",date:"Data",flightType:"Tip Zbor",from:"De la",to:"Către",dep:"Ora Plecare",arr:"Ora Sosire",mailBtn:"📧 Creează Email"},
+      pl: {title:"Formularz Danych Lotu",fname:"Imię",lname:"Nazwisko",addImg:"Dodaj Zdjęcie Lotu",date:"Data",flightType:"Rodzaj Lotu",from:"Z",to:"Do",dep:"Czas Odlotu",arr:"Czas Przylotu",mailBtn:"📧 Utwórz Email"}
     };
 
-    // تغيير اللغة
     function setLanguage(lang) {
       document.getElementById("formTitle").textContent = translations[lang].title;
       document.getElementById("lblVorname").textContent = translations[lang].fname;
@@ -289,25 +242,18 @@
       document.getElementById("lblDeparture").textContent = translations[lang].dep;
       document.getElementById("lblArrival").textContent = translations[lang].arr;
       document.getElementById("btnMail").textContent = translations[lang].mailBtn;
-
-      // اتجاه النصوص (للعربية)
       document.body.dir = (lang === "ar") ? "rtl" : "ltr";
     }
 
-    // مبدئياً الألمانية
+    // افتراضي ألماني
     setLanguage("de");
 
-    document.getElementById("langSelect").addEventListener("change", function() {
-      setLanguage(this.value);
-    });
-
-    // نفس الكود القديم الخاص بـ OCR و الإيميل
-    const germanAirports = ["FRA", "MUC", "BER", "HAM", "STR", "DUS", "CGN", "NUE", "HAJ", "LEJ", "DRS", "BRE", "DTM"];
+    // OCR + Mail code يبقى نفسه كما كتبناه سابقًا
+    const germanAirports = ["FRA","MUC","BER","HAM","STR","DUS","CGN","NUE","HAJ","LEJ","DRS","BRE","DTM"];
 
     document.getElementById("imageInput").addEventListener("change", async function (e) {
       const file = e.target.files[0];
       if (!file) return;
-
       const reader = new FileReader();
       reader.onload = async function (event) {
         const imageUrl = event.target.result;
@@ -315,43 +261,31 @@
         preview.src = imageUrl;
         preview.style.display = "block";
 
-        const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng+deu', {
-          logger: m => console.log(m)
-        });
-
+        const { data: { text } } = await Tesseract.recognize(imageUrl, 'eng+deu', {logger: m => console.log(m)});
         console.log("Erkannter Text:", text);
 
-        // Datum erkennen
         const dateRegex = /(\d{1,2})[.\s]*(Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)[a-z]*[.\s]*(\d{4})/i;
         const match = text.match(dateRegex);
         if (match) {
           const tag = match[1].padStart(2, '0');
-          const monatMap = {
-            Jan: "01", Feb: "02", Mär: "03", Apr: "04", Mai: "05", Jun: "06",
-            Jul: "07", Aug: "08", Sep: "09", Okt: "10", Nov: "11", Dez: "12"
-          };
+          const monatMap = {Jan:"01",Feb:"02",Mär:"03",Apr:"04",Mai:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Okt:"10",Nov:"11",Dez:"12"};
           const monat = monatMap[match[2].substr(0,3)] || "00";
           const jahr = match[3];
           document.getElementById("datum").value = `${tag}.${monat}.${jahr}`;
         }
 
-        // Flughafencodes
         const codes = [...new Set(text.match(/\b[A-Z]{3}\b/g))];
         const fromCode = codes[0] || "";
         const toCode = codes[1] || "";
-
         document.getElementById("from").value = fromCode;
         document.getElementById("to").value = toCode;
 
-        // Zeiten erkennen
         const timeRegex = /\b([01]?\d|2[0-3]):[0-5]\d\b/g;
         const times = text.match(timeRegex);
         document.getElementById("departure").value = times?.[0] || "";
         document.getElementById("arrival").value = times?.[1] || "";
 
-        const flugtyp = germanAirports.includes(toCode)
-          ? "Flug nach Arbeit / Flight to Work"
-          : "Flug nach Hause / Flight Home";
+        const flugtyp = germanAirports.includes(toCode) ? "Flug nach Arbeit / Flight to Work" : "Flug nach Hause / Flight Home";
         document.getElementById("flugtyp").value = flugtyp;
       };
       reader.readAsDataURL(file);
